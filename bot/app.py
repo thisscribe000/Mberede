@@ -19,6 +19,10 @@ from bot.handlers.emergency import (
 from bot.handlers.sos import get_sos_conversation, sos_contact_callback
 from bot.handlers.contacts import contacts_command, remove_contact_command
 from bot.handlers.admin import silent_command, delete_account_command
+from bot.handlers.recovery import get_recovery_conversation
+from bot.handlers.offline import backupcard_command
+from bot.handlers.export import get_export_handlers
+from bot.handlers.verify import get_verify_handlers
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -50,6 +54,14 @@ def create_app():
 
     app.add_handler(CommandHandler("silent", silent_command))
     app.add_handler(CommandHandler("delete", delete_account_command))
+    app.add_handler(get_recovery_conversation())
+    app.add_handler(CommandHandler("backupcard", backupcard_command))
+
+    for handler in get_export_handlers():
+        app.add_handler(handler)
+
+    for handler in get_verify_handlers():
+        app.add_handler(handler)
 
     app.add_handler(CallbackQueryHandler(view_contact_callback))
     app.add_handler(CallbackQueryHandler(delete_contact_callback))

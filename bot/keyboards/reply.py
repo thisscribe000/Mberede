@@ -37,6 +37,7 @@ def sos_contact_inline_keyboard(contacts: list) -> InlineKeyboardMarkup:
         ])
     keyboard.append([
         InlineKeyboardButton("📢 Send to All", callback_data="sos_all"),
+        InlineKeyboardButton("📍 Share Location", callback_data="sos_location"),
         InlineKeyboardButton("🔙 Cancel", callback_data="back_to_main"),
     ])
     return InlineKeyboardMarkup(keyboard)

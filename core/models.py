@@ -58,6 +58,8 @@ class EmergencyContact(Base):
     relationship: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     priority: Mapped[int] = mapped_column(Integer, default=1)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
+    verification_code: Mapped[Optional[str]] = mapped_column(String(6), nullable=True)
+    verification_expires: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     consent_obtained: Mapped[bool] = mapped_column(Boolean, default=False)
     consent_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
