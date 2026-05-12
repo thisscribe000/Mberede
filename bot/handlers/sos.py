@@ -1,22 +1,20 @@
 from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler, CommandHandler, MessageHandler, filters, CallbackQueryHandler
 
-from core.models import User, get_db
-from bot.keyboards.reply import registered_menu, guest_menu
+from core.models import User, EmergencyContact, SOSLog, AccessLog, get_db
+from bot.keyboards.reply import registered_menu, guest_menu, main_menu, sos_contact_inline_keyboard
 from bot.utils.auth import verify_pin
 from bot.utils.session import get_active_user
+
+
+ASK_SOS_PIN = 200
+ASK_SOS_CONTACTS = 201
+ASK_SOS_LOCATION = 202
 
 
 async def sos_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     db = get_db()
     user, override = get_active_user(update.effective_user.id)
-
-    if override:
-        await update.message.reply_text(
-            "❌ You can't send SOS while viewing another account.\n"
-            "Use /switchback to return to your account first.",
-        )
-        return ConversationHandler.END
 
     if not user or not user.pin_hash:
         await update.message.reply_text("❌ You need to register first. Use /register.")
@@ -26,12 +24,19 @@ async def sos_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("🔒 Your account is temporarily locked. Try again later.")
         return ConversationHandler.END
 
-    await update.message.reply_text("🔐 Enter your PIN to verify:")
-    return 200
+    context.user_data["sos_switched"] = override is not None
 
+    if override:
+        await update.message.reply_text(
+            f"🚨 <b>SOS Alert</b>\n\n"
+            f"You're sending an SOS from <b>{user.telegram_username or 'this account'}</b>'s contacts.\n"
+            "Enter your PIN to confirm:",
+            parse_mode="HTML",
+        )
+    else:
+        await update.message.reply_text("🔐 Enter your PIN to verify:")
 
-ASK_PIN = 200
-ASK_CONTACTS = 201
+    return ASK_SOS_PIN
 
 
 async def verify_pin(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -46,41 +51,36 @@ async def verify_pin(update: Update, context: ContextTypes.DEFAULT_TYPE):
             user.locked_until = __import__("datetime").datetime.utcnow() + timedelta(minutes=15)
         db.commit()
         await update.message.reply_text("❌ Incorrect PIN. Try again:")
-        return ASK_PIN
+        return ASK_SOS_PIN
 
     user.failed_attempts = 0
     user.last_accessed_at = __import__("datetime").datetime.utcnow()
     db.commit()
 
-    contacts = db.query(__import__("core.models", fromlist=["EmergencyContact"]).EmergencyContact).filter(
-        __import__("core.models", fromlist=["EmergencyContact"]).EmergencyContact.user_id == user.id
-    ).order_by(__import__("core.models", fromlist=["EmergencyContact"]).EmergencyContact.priority).all()
+    contacts = db.query(EmergencyContact).filter(
+        EmergencyContact.user_id == user.id
+    ).order_by(EmergencyContact.priority).all()
 
     if not contacts:
-        await update.message.reply_text("⚠️ You have no emergency contacts set up.", reply_markup=guest_menu())
+        await update.message.reply_text(
+            "⚠️ This account has no emergency contacts set up.",
+            reply_markup=guest_menu(),
+        )
         return ConversationHandler.END
 
     context.user_data["sos_user_id"] = user.id
     context.user_data["sos_contacts"] = contacts
 
-    from bot.keyboards.reply import sos_contact_inline_keyboard
     await update.message.reply_text(
         "🚨 <b>SOS Alert</b>\n\nSelect a contact to notify:",
         parse_mode="HTML",
         reply_markup=sos_contact_inline_keyboard(contacts),
     )
-    return ASK_CONTACTS
-
-
-ASK_SOS_PIN = 200
-ASK_SOS_CONTACTS = 201
-ASK_SOS_LOCATION = 203
+    return ASK_SOS_CONTACTS
 
 
 async def sos_contact_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    from bot.keyboards.reply import sos_contact_inline_keyboard, main_menu
     from core.sms import send_sos_sms
-    from core.models import SOSLog, AccessLog
 
     query = update.callback_query
     await query.answer()
@@ -92,7 +92,9 @@ async def sos_contact_callback(update: Update, context: ContextTypes.DEFAULT_TYP
 
     if data == "sos_location":
         await query.message.edit_text(
-            "📍 <b>Share Your Location</b>\n\nSend your current location so contacts know where to find you.\nTap the 📎 attachment button → Location.",
+            "📍 <b>Share Your Location</b>\n\n"
+            "Send your current location so contacts know where to find you.\n"
+            "Tap the 📎 attachment button → Location.",
             parse_mode="HTML",
         )
         context.user_data["awaiting_location"] = True
@@ -117,8 +119,6 @@ async def sos_contact_callback(update: Update, context: ContextTypes.DEFAULT_TYP
 
 async def _send_sos_to_contacts(update, context, contacts, message=None, location=None):
     from core.sms import send_sos_sms
-    from core.models import SOSLog, AccessLog
-    from bot.keyboards.reply import main_menu
 
     db = get_db()
     user = db.query(User).filter(User.id == context.user_data["sos_user_id"]).first()
