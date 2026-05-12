@@ -23,6 +23,7 @@ from bot.handlers.recovery import get_recovery_conversation
 from bot.handlers.offline import backupcard_command
 from bot.handlers.export import get_export_handlers
 from bot.handlers.verify import get_verify_handlers
+from bot.handlers.switch import get_switch_handlers
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -60,6 +61,9 @@ def create_app():
         app.add_handler(handler)
 
     for handler in get_verify_handlers():
+        app.add_handler(handler)
+
+    for handler in get_switch_handlers():
         app.add_handler(handler)
 
     app.add_handler(CallbackQueryHandler(view_contact_callback))

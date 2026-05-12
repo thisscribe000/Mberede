@@ -107,6 +107,17 @@ class RecoveryCode(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class SessionOverride(Base):
+    __tablename__ = "session_overrides"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    telegram_user_id = Column(BigInteger, unique=True, nullable=False, index=True)
+    original_user_id = Column(String(36), nullable=False)
+    guest_user_id = Column(String(36), nullable=False)
+    switched_at = Column(DateTime, default=datetime.utcnow)
+    expires_at = Column(DateTime, nullable=False)
+
+
 _engine = None
 _SessionLocal = None
 _async_engine = None

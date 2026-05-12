@@ -1,15 +1,15 @@
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters, ConversationHandler
+from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters, ConversationHandler, CallbackQueryHandler
 
 from core.models import User, EmergencyContact, get_db
 from bot.keyboards.reply import main_menu, contact_inline_keyboard
+from bot.utils.session import get_active_user
 from bot.utils.validators import validate_name, validate_phone, sanitize_input
-from bot.utils.auth import verify_pin
 
 
 async def contacts_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     db = get_db()
-    user = db.query(User).filter(User.telegram_user_id == update.effective_user.id).first()
+    user, override = get_active_user(update.effective_user.id)
 
     if not user or not user.pin_hash:
         await update.message.reply_text("❌ You need to register first. Use /register.")
@@ -37,10 +37,17 @@ async def contacts_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def add_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     db = get_db()
-    user = db.query(User).filter(User.telegram_user_id == update.effective_user.id).first()
+    user, override = get_active_user(update.effective_user.id)
 
     if not user or not user.pin_hash:
         await update.message.reply_text("❌ You need to register first. Use /register.")
+        return ConversationHandler.END
+
+    if override:
+        await update.message.reply_text(
+            "❌ You can't modify contacts while in guest mode.\n"
+            "Use /switchback to return to your account.",
+        )
         return ConversationHandler.END
 
     count = db.query(EmergencyContact).filter(EmergencyContact.user_id == user.id).count()
@@ -80,7 +87,7 @@ async def add_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return AWAIT_PHONE
 
     db = get_db()
-    user = db.query(User).filter(User.telegram_user_id == update.effective_user.id).first()
+    user, _ = get_active_user(update.effective_user.id)
     existing = db.query(EmergencyContact).filter(
         EmergencyContact.user_id == user.id,
         EmergencyContact.phone == formatted,
@@ -112,7 +119,7 @@ async def add_rel(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return AWAIT_REL
 
     db = get_db()
-    user = db.query(User).filter(User.telegram_user_id == update.effective_user.id).first()
+    user, _ = get_active_user(update.effective_user.id)
     count = db.query(EmergencyContact).filter(EmergencyContact.user_id == user.id).count()
 
     contact = EmergencyContact(
@@ -147,10 +154,17 @@ async def add_cancel_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 async def remove_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     db = get_db()
-    user = db.query(User).filter(User.telegram_user_id == update.effective_user.id).first()
+    user, override = get_active_user(update.effective_user.id)
 
     if not user or not user.pin_hash:
         await update.message.reply_text("❌ You need to register first. Use /register.")
+        return
+
+    if override:
+        await update.message.reply_text(
+            "❌ You can't modify contacts while in guest mode.\n"
+            "Use /switchback to return to your account.",
+        )
         return
 
     contacts = db.query(EmergencyContact).filter(EmergencyContact.user_id == user.id).order_by(EmergencyContact.priority).all()
@@ -213,6 +227,3 @@ def get_contact_handlers():
         CommandHandler("remove", remove_command),
         CallbackQueryHandler(remove_callback, pattern="^(remove_confirm:|remove_cancel$)"),
     ]
-
-
-from telegram.ext import CallbackQueryHandler

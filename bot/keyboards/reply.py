@@ -22,6 +22,16 @@ def guest_menu() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, input_field_placeholder="Select an option")
 
 
+def switched_menu() -> ReplyKeyboardMarkup:
+    keyboard = [
+        [KeyboardButton("/contacts")],
+        [KeyboardButton("/emergency")],
+        [KeyboardButton("/switchback")],
+        [KeyboardButton("/help")],
+    ]
+    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, input_field_placeholder="Select an option")
+
+
 def main_menu() -> ReplyKeyboardMarkup:
     return guest_menu()
 
