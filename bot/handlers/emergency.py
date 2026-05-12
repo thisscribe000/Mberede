@@ -124,26 +124,72 @@ async def view_contact_callback(update: Update, context: ContextTypes.DEFAULT_TY
         f"📱 {contact.phone}\n"
         f"💼 {contact.relationship or 'Contact'}",
         parse_mode="HTML",
-        reply_markup=contact_action_keyboard(contact_id),
+        reply_markup=contact_action_keyboard(contact.id, contact.phone, contact.name),
     )
 
 
-async def delete_contact_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def voip_call_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+    data = query.data
 
-    if not query.data.startswith("delete_contact:"):
+    if not data.startswith("voip_call:"):
         return
 
-    contact_id = query.data.split(":", 1)[1]
+    contact_id = data.split(":", 1)[1]
     db = get_db()
     contact = db.query(EmergencyContact).filter(EmergencyContact.id == contact_id).first()
 
-    if contact:
-        db.delete(contact)
+    if not contact:
+        await query.message.edit_text("❌ Contact not found.")
+        return
+
+    await query.message.edit_text(
+        f"📞 <b>Initiating Server Call</b>\n\n"
+        f"Calling {contact.name} at {contact.phone}...\n\n"
+        "<i>The contact will receive a call connecting them to this Telegram account.</i>",
+        parse_mode="HTML",
+    )
+
+    try:
+        from core.voip import initiate_server_call
+        call_result = initiate_server_call(
+            contact_phone=contact.phone,
+            accessor_name=update.effective_user.full_name or "Someone",
+            accessor_telegram_id=update.effective_user.id,
+        )
+
+        AccessLog(
+            user_id=contact.user_id,
+            accessor_telegram_id=update.effective_user.id,
+            action="voip_call_initiated",
+            contact_id=contact_id,
+            success=True,
+        )
         db.commit()
 
-    await query.message.edit_text("🗑️ Contact removed.")
+        if call_result.get("success"):
+            await context.bot.edit_message_text(
+                chat_id=query.message.chat_id,
+                message_id=query.message.message_id,
+                text=f"📞 <b>Call Connected!</b>\n\n"
+                     f"{contact.name} at {contact.phone}\n\n"
+                     "You are now connected.",
+                parse_mode="HTML",
+            )
+        else:
+            await context.bot.edit_message_text(
+                chat_id=query.message.chat_id,
+                message_id=query.message.message_id,
+                text=f"❌ Call failed: {call_result.get('error', 'Unknown error')}",
+                parse_mode="HTML",
+            )
+    except Exception as e:
+        await context.bot.edit_message_text(
+            chat_id=query.message.chat_id,
+            message_id=query.message.message_id,
+            text=f"❌ VoIP call service not available: {e}",
+        )
 
 
 def get_emergency_conversation() -> ConversationHandler:

@@ -10,7 +10,12 @@ from core.config import config
 from core.models import init_db
 from bot.handlers.start import start_command, help_command, myid_command
 from bot.handlers.register import get_register_conversation
-from bot.handlers.emergency import get_emergency_conversation, view_contact_callback, delete_contact_callback
+from bot.handlers.emergency import (
+    get_emergency_conversation,
+    view_contact_callback,
+    delete_contact_callback,
+    voip_call_callback,
+)
 from bot.handlers.sos import get_sos_conversation, sos_contact_callback
 from bot.handlers.contacts import contacts_command, remove_contact_command
 from bot.handlers.admin import silent_command, delete_account_command
@@ -49,6 +54,7 @@ def create_app():
     app.add_handler(CallbackQueryHandler(view_contact_callback))
     app.add_handler(CallbackQueryHandler(delete_contact_callback))
     app.add_handler(CallbackQueryHandler(sos_contact_callback))
+    app.add_handler(CallbackQueryHandler(voip_call_callback))
 
     log.info("Mberede bot initialized")
     return app

@@ -42,16 +42,43 @@ def sos_contact_inline_keyboard(contacts: list) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 
-def contact_action_keyboard(contact_id: str) -> InlineKeyboardMarkup:
+def contact_action_keyboard(contact_id: str, contact_phone: str, contact_name: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([
         [
-            InlineKeyboardButton("📞 View Number", callback_data=f"view_contact:{contact_id}"),
+            InlineKeyboardButton(
+                f"📞 {contact_name}: {contact_phone}",
+                url=f"tel:{contact_phone}",
+            )
         ],
         [
-            InlineKeyboardButton("🚨 Send SOS", callback_data=f"sos_contact:{contact_id}"),
+            InlineKeyboardButton(
+                "💬 Telegram Call",
+                switch_inline_query=f"call {contact_phone}",
+            )
         ],
         [
-            InlineKeyboardButton("🗑️ Remove Contact", callback_data=f"delete_contact:{contact_id}"),
+            InlineKeyboardButton(
+                "☁️ Server Call (VoIP)",
+                callback_data=f"voip_call:{contact_id}",
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                "💬 SMS",
+                callback_data=f"view_contact:{contact_id}",
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                "🚨 Send SOS SMS",
+                callback_data=f"sos_contact:{contact_id}",
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                "🗑️ Remove Contact",
+                callback_data=f"delete_contact:{contact_id}",
+            )
         ],
         [
             InlineKeyboardButton("🔙 Back", callback_data="back_to_main"),
