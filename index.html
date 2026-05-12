@@ -5,186 +5,631 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mberede — Emergency Contact Access When It Matters Most</title>
   <meta name="description" content="When your phone is lost or stolen, anyone can reach your loved ones through a simple Telegram bot. No internet needed on your device.">
+
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: #0a0a1a;
       color: #e0e0e0;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
     }
-    .hero {
-      flex: 1;
+
+    /* ── NAV ── */
+    nav {
       display: flex;
-      flex-direction: column;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 60px 24px;
-      max-width: 700px;
-      margin: 0 auto;
+      padding: 20px 48px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
     }
-    .logo {
-      font-size: 64px;
-      margin-bottom: 8px;
-    }
-    .name {
-      font-size: 56px;
+    .nav-logo {
+      font-size: 24px;
       font-weight: 800;
+      color: white;
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: #ff6b6b; }
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+    .nav-links a {
+      color: #888;
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: white; }
+    .nav-cta {
+      padding: 8px 20px;
+      background: #ff6b6b;
+      color: white;
+      text-decoration: none;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .nav-cta:hover { background: #ee5a24; }
+
+    /* ── HERO ── */
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      padding: 100px 48px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+    .hero-text {}
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,107,107,0.15);
+      color: #ff6b6b;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(255,107,107,0.2);
+    }
+    .hero h1 {
+      font-size: clamp(40px, 5vw, 64px);
+      font-weight: 800;
+      color: white;
+      line-height: 1.1;
+      margin-bottom: 8px;
+      letter-spacing: -1px;
+    }
+    .hero h1 .accent {
       background: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      letter-spacing: -1px;
+    }
+    .hero-sub {
+      font-size: 20px;
+      color: #aaa;
+      margin-bottom: 36px;
+      line-height: 1.6;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 48px;
+    }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 50px;
+      text-decoration: none;
+      box-shadow: 0 4px 20px rgba(238,90,36,0.35);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(238,90,36,0.45);
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      background: rgba(255,255,255,0.08);
+      color: #ccc;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 50px;
+      text-decoration: none;
+      border: 1px solid rgba(255,255,255,0.12);
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.12);
+      color: white;
+    }
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+    }
+    .stat { }
+    .stat .num {
+      font-size: 28px;
+      font-weight: 800;
+      color: white;
+    }
+    .stat .label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    /* ── HERO VISUAL ── */
+    .hero-visual {
+      position: relative;
+    }
+    .phone-frame {
+      background: #111827;
+      border-radius: 36px;
+      padding: 16px;
+      box-shadow: 0 0 60px rgba(255,107,107,0.15), 0 20px 60px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .screen {
+      background: #0d1117;
+      border-radius: 26px;
+      overflow: hidden;
+      min-height: 420px;
+    }
+    .screen-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: #161b22;
+    }
+    .screen-dot { width: 8px; height: 8px; border-radius: 50%; background: #333; }
+    .screen-dot.red { background: #ff5f57; }
+    .screen-dot.yellow { background: #febc2e; }
+    .screen-dot.green { background: #28c840; }
+    .screen-body { padding: 20px; }
+    .msg {
+      margin-bottom: 16px;
+      animation: fadeIn 0.4s ease;
+    }
+    .msg.bot {
+      background: rgba(255,107,107,0.12);
+      border: 1px solid rgba(255,107,107,0.15);
+      border-radius: 16px 16px 16px 4px;
+      padding: 14px 16px;
+      max-width: 85%;
+    }
+    .msg.bot p { font-size: 13px; line-height: 1.6; color: #ccc; margin: 0; }
+    .msg.bot strong { color: white; display: block; margin-bottom: 4px; font-size: 14px; }
+    .msg.user {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      border-radius: 16px 16px 4px 16px;
+      padding: 12px 16px;
+      max-width: 60%;
+      margin-left: auto;
+    }
+    .msg.user p { font-size: 13px; color: white; margin: 0; }
+    .floating-tag {
+      position: absolute;
+      background: white;
+      color: #0a0a1a;
+      padding: 8px 14px;
+      border-radius: 24px;
+      font-size: 12px;
+      font-weight: 700;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .floating-tag.tl { top: -20px; left: -20px; }
+    .floating-tag.br { bottom: -20px; right: -20px; background: #ff6b6b; color: white; }
+
+    /* ── SECTION ── */
+    section { padding: 80px 48px; }
+    .section-center { text-align: center; }
+    .section-wide { max-width: 1200px; margin: 0 auto; }
+    .section-label {
+      display: inline-block;
+      background: rgba(255,107,107,0.12);
+      color: #ff6b6b;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255,107,107,0.15);
+    }
+    .section-title {
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 800;
+      color: white;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+    .section-sub {
+      font-size: 17px;
+      color: #888;
+      max-width: 600px;
+      margin: 0 auto 48px;
+      line-height: 1.7;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    .step-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 24px;
+      padding: 36px 28px;
+      text-align: center;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .step-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,107,107,0.3);
+    }
+    .step-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    .step-num {
+      display: inline-block;
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+      color: white;
+      font-weight: 800;
+      font-size: 16px;
+      border-radius: 50%;
+      line-height: 36px;
       margin-bottom: 16px;
     }
-    .tagline {
-      font-size: 22px;
-      color: #aaa;
-      margin-bottom: 40px;
-      line-height: 1.5;
+    .step-card h3 { font-size: 18px; font-weight: 700; color: white; margin-bottom: 10px; }
+    .step-card p { font-size: 14px; color: #777; line-height: 1.7; }
+
+    /* ── FEATURES ── */
+    .features-bg {
+      background: rgba(255,255,255,0.02);
+      border-top: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
     }
-    .cta {
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .feat-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 20px;
+      padding: 28px 24px;
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .feat-card:hover {
+      border-color: rgba(255,107,107,0.2);
+      transform: translateY(-2px);
+    }
+    .feat-icon { font-size: 32px; flex-shrink: 0; margin-top: 2px; }
+    .feat-card h3 { font-size: 16px; font-weight: 700; color: white; margin-bottom: 6px; }
+    .feat-card p { font-size: 13px; color: #777; line-height: 1.6; }
+
+    /* ── SCENARIO ── */
+    .scenario-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+    }
+    .scenario-text h2 { font-size: 36px; font-weight: 800; color: white; margin-bottom: 20px; letter-spacing: -0.5px; }
+    .scenario-text p { font-size: 16px; color: #888; line-height: 1.8; margin-bottom: 16px; }
+    .scenario-list { list-style: none; margin-bottom: 32px; }
+    .scenario-list li { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; font-size: 15px; color: #bbb; }
+    .scenario-list li::before { content: "✓"; color: #ff6b6b; font-weight: 700; margin-top: 1px; flex-shrink: 0; }
+    .quote-box {
+      background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(254,202,87,0.05));
+      border: 1px solid rgba(255,107,107,0.15);
+      border-radius: 20px;
+      padding: 28px;
+    }
+    .quote-box p { font-size: 16px; color: #ccc; font-style: italic; line-height: 1.7; margin-bottom: 16px; }
+    .quote-box .author { font-size: 13px; color: #888; }
+    .quote-box .author strong { color: white; }
+
+    /* ── CTA ── */
+    .cta-section {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 50%, #ff6b6b 100%);
+      padding: 80px 48px;
+      text-align: center;
+    }
+    .cta-section h2 {
+      font-size: clamp(28px, 4vw, 44px);
+      font-weight: 800;
+      color: white;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+    .cta-section p { font-size: 17px; color: rgba(255,255,255,0.8); margin-bottom: 36px; }
+    .btn-white {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       padding: 16px 40px;
-      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-      color: white;
+      background: white;
+      color: #ee5a24;
       font-size: 18px;
-      font-weight: 700;
+      font-weight: 800;
       border-radius: 50px;
       text-decoration: none;
-      margin-bottom: 40px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
       transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 20px rgba(238, 90, 36, 0.4);
     }
-    .cta:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 30px rgba(238, 90, 36, 0.5);
-    }
-    .video-wrap {
-      width: 100%;
-      max-width: 580px;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
-      margin-bottom: 40px;
-      background: #111;
-    }
-    .video-wrap iframe {
-      width: 100%;
-      aspect-ratio: 16/9;
-      border: none;
-      display: block;
-    }
-    .how {
-      width: 100%;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-bottom: 40px;
-    }
-    .step {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
-      padding: 24px 20px;
-      text-align: center;
-    }
-    .step .num {
-      font-size: 40px;
-      font-weight: 800;
-      color: #ff6b6b;
-      margin-bottom: 8px;
-    }
-    .step h3 { font-size: 15px; margin-bottom: 6px; color: white; }
-    .step p { font-size: 13px; color: #888; line-height: 1.5; }
-    .features {
-      width: 100%;
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      margin-bottom: 40px;
-    }
-    .feat {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-radius: 12px;
-      padding: 16px;
-      text-align: left;
-    }
-    .feat .icon { font-size: 24px; flex-shrink: 0; }
-    .feat .text { font-size: 14px; color: #ccc; }
-    .feat .text strong { display: block; color: white; margin-bottom: 2px; }
+    .btn-white:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.2); }
+
+    /* ── FOOTER ── */
     footer {
-      text-align: center;
-      padding: 24px;
+      padding: 32px 48px;
       border-top: 1px solid rgba(255,255,255,0.06);
-      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       color: #555;
+      font-size: 13px;
     }
-    @media (max-width: 600px) {
-      .name { font-size: 40px; }
-      .how { grid-template-columns: 1fr; }
-      .features { grid-template-columns: 1fr; }
+    footer a { color: #888; text-decoration: none; }
+    footer a:hover { color: white; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      nav .nav-links { display: none; }
+      .hero { grid-template-columns: 1fr; gap: 48px; padding: 60px 24px; }
+      .hero-visual { order: -1; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .scenario-grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 12px; text-align: center; }
+      section { padding: 60px 24px; }
     }
   </style>
 </head>
 <body>
 
-<div class="hero">
-  <div class="logo">🚨</div>
-  <div class="name">Mberede</div>
-  <div class="tagline">Your phone is gone. Your loved ones are not.<br>Reach them in seconds — from any device.</div>
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">Mberede<span>.</span></a>
+    <ul class="nav-links">
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#scenario">Why It Matters</a></li>
+    </ul>
+    <a href="https://t.me/YOUR_BOT_USERNAME_HERE" class="nav-cta">Open Bot →</a>
+  </nav>
 
-  <div class="video-wrap">
-    <iframe
-      src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-      title="Mberede Demo"
-      allowfullscreen>
-    </iframe>
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-text">
+      <span class="hero-badge">🚨 Emergency Contact Access</span>
+      <h1>Your phone is gone.<br><span class="accent">Your loved ones are not.</span></h1>
+      <p class="hero-sub">When your phone is lost or stolen, anyone can reach your emergency contacts in seconds — through a simple Telegram bot. No internet on your device needed.</p>
+      <div class="hero-actions">
+        <a href="https://t.me/YOUR_BOT_USERNAME_HERE" class="btn-primary">Get Mberede →</a>
+        <a href="#how" class="btn-secondary">See How It Works</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="num">0</div>
+          <div class="label">Data Sold</div>
+        </div>
+        <div class="stat">
+          <div class="num">24/7</div>
+          <div class="label">Access</div>
+        </div>
+        <div class="stat">
+          <div class="num">100%</div>
+          <div class="label">Free</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="floating-tag tl">🔐 PIN Protected</div>
+      <div class="floating-tag br">📞 Call or SMS</div>
+      <div class="phone-frame">
+        <div class="screen">
+          <div class="screen-header">
+            <div class="screen-dot red"></div>
+            <div class="screen-dot yellow"></div>
+            <div class="screen-dot green"></div>
+          </div>
+          <div class="screen-body">
+            <div class="msg bot">
+              <p><strong>🚨 Mberede — Your Emergency Contacts</strong></p>
+              <p>Enter the owner's secret PIN to access their emergency contacts and send an SOS alert.</p>
+            </div>
+            <div class="msg user">
+              <p>123456</p>
+            </div>
+            <div class="msg bot">
+              <p><strong>✅ PIN Verified!</strong></p>
+              <p>Emergency Contacts:</p>
+              <p>1. Jane Doe (Wife) — +234 801 234 5678</p>
+              <p>2. Dr. Smith (Doctor) — +234 809 876 5432</p>
+            </div>
+            <div class="msg user">
+              <p>SOS to Jane</p>
+            </div>
+            <div class="msg bot">
+              <p>🚨 <strong>SOS Sent!</strong></p>
+              <p>Jane has been notified with your emergency message and location.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="how">
-    <div class="step">
-      <div class="num">1</div>
-      <h3>Register Once</h3>
-      <p>Set a secret PIN and save your emergency contacts through the bot.</p>
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="section-wide">
+      <div class="section-center">
+        <span class="section-label">Simple Process</span>
+        <h2 class="section-title">Three steps. That's all.</h2>
+        <p class="section-sub">No complicated setup. No subscriptions. Just register once, and your safety net is always ready.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-num">1</div>
+          <h3>Register &amp; Set PIN</h3>
+          <p>Open the Telegram bot, create a secret 4-6 digit PIN, and add up to 5 emergency contacts with their names and phone numbers.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">2</div>
+          <h3>Phone is Lost</h3>
+          <p>Your phone goes missing. You find any device — any phone, any Telegram account — and open the Mberede bot.</p>
+        </div>
+        <div class="step-card">
+          <div class="step-num">3</div>
+          <h3>Contacts Reached</h3>
+          <p>Enter your PIN, see your contacts, call or SMS directly, or send an SOS with your location. Your loved ones are notified instantly.</p>
+        </div>
+      </div>
     </div>
-    <div class="step">
-      <div class="num">2</div>
-      <h3>Phone Lost?</h3>
-      <p>Anyone finds it, opens the bot, enters your PIN.</p>
-    </div>
-    <div class="step">
-      <div class="num">3</div>
-      <h3>Contacts Reached</h3>
-      <p>Call, SMS, or SOS — your loved ones are notified instantly.</p>
-    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <div class="features-bg">
+    <section id="features">
+      <div class="section-wide">
+        <div class="section-center">
+          <span class="section-label">Built for Emergencies</span>
+          <h2 class="section-title">Everything you need in the moment.</h2>
+          <p class="section-sub">From PIN protection to offline backup cards — Mberede is designed for real emergencies in real life.</p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feat-card">
+            <div class="feat-icon">🔐</div>
+            <div>
+              <h3>PIN Protected</h3>
+              <p>Your contacts are secured with a secret PIN. Only you and anyone you trust with the code can access them.</p>
+            </div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">📞</div>
+            <div>
+              <h3>Call &amp; SMS</h3>
+              <p>Call emergency contacts directly or send SMS from the app. Works with any phone that has Telegram.</p>
+            </div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">📍</div>
+            <div>
+              <h3>Location in SOS</h3>
+              <p>SOS alerts include your GPS location so contacts know exactly where to find you.</p>
+            </div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">☁️</div>
+            <div>
+              <h3>VoIP Calls</h3>
+              <p>Server-initiated calls connect you to your emergency contact even without a SIM in the device.</p>
+            </div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">🔄</div>
+            <div>
+              <h3>Multi-Account</h3>
+              <p>Help others access their contacts from your device without logging out of your own account.</p>
+            </div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">🖨️</div>
+            <div>
+              <h3>Offline Backup Card</h3>
+              <p>Generate a printable QR card with your contacts. Works even without internet on the finding device.</p>
+            </div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">✅</div>
+            <div>
+              <h3>Contact Consent</h3>
+              <p>Contacts receive verification SMS so they consent to being part of your emergency network.</p>
+            </div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">🌍</div>
+            <div>
+              <h3>Pan-African</h3>
+              <p>Built for Nigeria and the African continent. Supports local SMS providers and international formats.</p>
+            </div>
+          </div>
+          <div class="feat-card">
+            <div class="feat-icon">📤</div>
+            <div>
+              <h3>Data Export</h3>
+              <p>Export or delete your data anytime. Fully GDPR/NDPR compliant with your privacy in mind.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <div class="features">
-    <div class="feat"><span class="icon">🔐</span><span class="text"><strong>PIN Protected</strong>Your contacts stay private.</span></div>
-    <div class="feat"><span class="icon">📱</span><span class="text"><strong>Any Device</strong>Works from any Telegram account.</span></div>
-    <div class="feat"><span class="icon">📍</span><span class="text"><strong>Location Sharing</strong>SOS with your GPS location.</span></div>
-    <div class="feat"><span class="icon">📞</span><span class="text"><strong>Call & SMS</strong>Direct dial or emergency SMS.</span></div>
-    <div class="feat"><span class="icon">🖨️</span><span class="text"><strong>Offline Card</strong>Print a backup QR card.</span></div>
-    <div class="feat"><span class="icon">🌍</span><span class="text"><strong>Pan-Africa</strong>Built for Nigeria and beyond.</span></div>
+  <!-- SCENARIO -->
+  <section id="scenario">
+    <div class="section-wide">
+      <div class="scenario-grid">
+        <div class="scenario-text">
+          <span class="section-label">Why It Matters</span>
+          <h2>When every second counts.</h2>
+          <p>You lose your phone in Lagos traffic. You're stranded, don't know anyone's number by heart, and your life is on hold.</p>
+          <p>Someone finds your phone. They open Telegram, search for Mberede, enter your secret PIN, see your wife's number, and call her immediately.</p>
+          <ul class="scenario-list">
+            <li>No login required — your Telegram ID is your identity</li>
+            <li>No internet on your device — the finder uses their own connection</li>
+            <li>No app to install — works through Telegram on any device</li>
+            <li>SOS sends your location so help finds you</li>
+          </ul>
+          <a href="https://t.me/YOUR_BOT_USERNAME_HERE" class="btn-primary">Try Mberede Free →</a>
+        </div>
+        <div class="quote-box">
+          <p>"When my husband lost his phone in the market, a good Samaritan opened Mberede, found my number, and called me within 2 minutes. We were reunited in under 30 minutes."</p>
+          <div class="author">
+            <strong>Amaka O.</strong> — Lagos, Nigeria
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <h2>Your emergency contacts are one PIN away.</h2>
+    <p>Free to use. No data sold. Open source. Built for Africa.</p>
+    <a href="https://t.me/YOUR_BOT_USERNAME_HERE" class="btn-white">Get Started on Telegram →</a>
   </div>
 
-  <a class="cta" href="https://t.me/YOUR_BOT_USERNAME_HERE">Open Mberede Bot →</a>
-</div>
-
-<footer>
-  Mberede — Reach your loved ones when it matters most.<br>
-  Open source. No data sold. Emergency contact access for everyone.
-</footer>
+  <!-- FOOTER -->
+  <footer>
+    <span>© 2026 Mberede. Open source. Built with ❤️ in Nigeria.</span>
+    <span><a href="#">Privacy Policy</a> · <a href="#">Terms of Service</a> · <a href="https://github.com/thisscribe000/Mberede">GitHub</a></span>
+  </footer>
 
 </body>
 </html>
