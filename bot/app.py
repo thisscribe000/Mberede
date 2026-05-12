@@ -19,6 +19,7 @@ from bot.handlers.emergency import (
 from bot.handlers.sos import get_sos_conversation, sos_contact_callback
 from bot.handlers.contacts import get_contact_handlers
 from bot.handlers.admin import silent_command, delete_account_command
+from bot.handlers.analytics import get_admin_handlers
 from bot.handlers.recovery import get_recovery_conversation
 from bot.handlers.offline import backupcard_command
 from bot.handlers.export import get_export_handlers
@@ -64,6 +65,9 @@ def create_app():
         app.add_handler(handler)
 
     for handler in get_switch_handlers():
+        app.add_handler(handler)
+
+    for handler in get_admin_handlers():
         app.add_handler(handler)
 
     app.add_handler(CallbackQueryHandler(view_contact_callback))

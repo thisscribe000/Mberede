@@ -23,9 +23,13 @@ class Config:
     progressive_delay_seconds: int
     session_ttl_minutes: int
     log_level: str
+    admin_telegram_ids: list
 
     @classmethod
     def from_env(cls) -> "Config":
+        admin_ids_str = os.getenv("ADMIN_TELEGRAM_IDS", "")
+        admin_ids = [int(x.strip()) for x in admin_ids_str.split(",") if x.strip().isdigit()]
+
         return cls(
             telegram_bot_token=os.getenv("TELEGRAM_BOT_TOKEN", ""),
             database_url=os.getenv("DATABASE_URL", "sqlite:///./mberede.db"),
@@ -42,6 +46,7 @@ class Config:
             progressive_delay_seconds=int(os.getenv("PROGRESSIVE_DELAY_SECONDS", "2")),
             session_ttl_minutes=int(os.getenv("SESSION_TTL_MINUTES", "10")),
             log_level=os.getenv("LOG_LEVEL", "INFO"),
+            admin_telegram_ids=admin_ids,
         )
 
 
