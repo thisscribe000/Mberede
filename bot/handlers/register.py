@@ -136,6 +136,8 @@ async def ask_contact_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=ReplyKeyboardMarkup(
             [[k for k in row] for row in keyboard],
             input_field_placeholder="Select relationship",
+            one_time_keyboard=True,
+            resize_keyboard=True,
         ),
     )
     return ASK_CONTACT_RELATIONSHIP
@@ -182,8 +184,10 @@ async def ask_relationship(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "Would you like to add another contact?",
         parse_mode="HTML",
         reply_markup=ReplyKeyboardMarkup(
-            [[k for k in row] for row in keyboard],
+            [["+ Add Another", "I'm Done"]],
             input_field_placeholder="Add another?",
+            one_time_keyboard=True,
+            resize_keyboard=True,
         ),
     )
     return ASK_ADD_ANOTHER
