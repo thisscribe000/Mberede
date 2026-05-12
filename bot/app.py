@@ -37,7 +37,6 @@ def create_app():
     app = (
         Application.builder()
         .token(config.telegram_bot_token)
-        .conversation_db()
         .build()
     )
 

@@ -1,6 +1,6 @@
 import re
-from telegram import Update
-from telegram.ext import ContextTypes, ConversationHandler, CommandHandler, MessageHandler, filters
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import ContextTypes, ConversationHandler, CommandHandler, MessageHandler, filters, CallbackQueryHandler
 
 from core.models import User, EmergencyContact, get_db
 from core.sms import send_sos_sms
@@ -134,6 +134,3 @@ def get_verify_handlers():
         CallbackQueryHandler(verify_select_contact, pattern="^verify_"),
         MessageHandler(filters.TEXT & ~filters.COMMAND, verify_code_entry),
     ]
-
-
-from telegram import CallbackQueryHandler

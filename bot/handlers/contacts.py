@@ -70,7 +70,7 @@ async def remove_contact_command(update: Update, context: ContextTypes.DEFAULT_T
         await update.message.reply_text("Usage: /remove <contact name>\n\nYour contacts:")
         contacts = db.query(EmergencyContact).filter(EmergencyContact.user_id == user.id).all()
         for c in contacts:
-            await update.message.reply_text(f"• {c.name} ({c.relationship or 'Contact'})")
+            await update.message.reply_text(f"• {c.name} ({c.relationship_ or 'Contact'})")
         return
 
     contact = db.query(EmergencyContact).filter(

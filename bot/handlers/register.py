@@ -143,10 +143,14 @@ async def ask_contact_phone(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def ask_relationship(update: Update, context: ContextTypes.DEFAULT_TYPE):
     from core.models import EmergencyContact, User
+    rel = update.message.text.strip()
+    if not rel:
+        await update.message.reply_text("Please select or type a relationship:")
+        return ASK_CONTACT_RELATIONSHIP
+
     db = get_db()
     user = db.query(User).filter(User.telegram_user_id == update.effective_user.id).first()
 
-    rel = update.message.text.strip()
     contact_count = db.query(EmergencyContact).filter(EmergencyContact.user_id == user.id).count()
 
     if contact_count >= 5:
@@ -158,14 +162,14 @@ async def ask_relationship(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_id=user.id,
         name=context.user_data["contact_name"],
         phone=context.user_data["contact_phone"],
-        relationship=rel,
+        relationship_=rel,
         priority=contact_count + 1,
     )
     db.add(contact)
     db.commit()
 
     contact_name = context.user_data["contact_name"]
-    context.user_data.clear()
+    contact_phone = contact.phone
 
     keyboard = [
         ["+ Add Another", "I'm Done"],
@@ -174,7 +178,7 @@ async def ask_relationship(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         f"✅ <b>Contact saved!</b>\n\n"
         f"👤 {contact_name} ({rel})\n"
-        f"📱 {contact.phone}\n\n"
+        f"📱 {contact_phone}\n\n"
         "Would you like to add another contact?",
         parse_mode="HTML",
         reply_markup=ReplyKeyboardMarkup(
@@ -188,16 +192,16 @@ async def ask_relationship(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def ask_add_another(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if update.message.text.strip() == "+ Add Another":
         context.user_data.clear()
-        await update.message.reply_text("👤 Enter the contact's name:")
+        await update.message.reply_text("👤 Enter the next contact's name:")
         return ASK_FIRST_CONTACT_NAME
     else:
-        context.user_data.clear()
         await update.message.reply_text(
             "🎉 <b>You're all set!</b>\n\n"
             "Your emergency contacts are ready.\n"
             "If your phone is lost or stolen, anyone can message this bot and enter your PIN to reach your loved ones.\n\n"
             "Use /contacts to manage your contacts.\n"
-            "Use /sos to send an emergency alert.",
+            "Use /sos to send an emergency alert.\n"
+            "Use /backupcard to generate a printable offline card.",
             parse_mode="HTML",
             reply_markup=main_menu(),
         )

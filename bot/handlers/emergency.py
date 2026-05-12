@@ -122,7 +122,7 @@ async def view_contact_callback(update: Update, context: ContextTypes.DEFAULT_TY
     await query.message.edit_text(
         f"👤 <b>{contact.name}</b>\n"
         f"📱 {contact.phone}\n"
-        f"💼 {contact.relationship or 'Contact'}",
+        f"💼 {contact.relationship_ or 'Contact'}",
         parse_mode="HTML",
         reply_markup=contact_action_keyboard(contact.id, contact.phone, contact.name),
     )
@@ -190,6 +190,24 @@ async def voip_call_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
             message_id=query.message.message_id,
             text=f"❌ VoIP call service not available: {e}",
         )
+
+
+async def delete_contact_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
+
+    if not query.data.startswith("delete_contact:"):
+        return
+
+    contact_id = query.data.split(":", 1)[1]
+    db = get_db()
+    contact = db.query(EmergencyContact).filter(EmergencyContact.id == contact_id).first()
+
+    if contact:
+        db.delete(contact)
+        db.commit()
+
+    await query.message.edit_text("🗑️ Contact removed.")
 
 
 def get_emergency_conversation() -> ConversationHandler:

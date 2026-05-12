@@ -2,8 +2,8 @@ import json
 import csv
 import io
 from datetime import datetime
-from telegram import Update
-from telegram.ext import ContextTypes, ConversationHandler, CommandHandler, MessageHandler, filters
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, InputFile
+from telegram.ext import ContextTypes, CommandHandler, CallbackQueryHandler
 
 from core.models import User, EmergencyContact, AccessLog, SOSLog, RecoveryCode, get_db
 from bot.keyboards.reply import main_menu
@@ -17,11 +17,9 @@ async def export_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("❌ You need to register first. Use /register.")
         return
 
-    await update.message.reply_text("📤 <b>Data Export</b>\n\nChoose export format:", parse_mode="HTML")
-
-    from telegram import InlineKeyboardButton, InlineKeyboardMarkup
     await update.message.reply_text(
-        "Select format:",
+        "📤 <b>Data Export</b>\n\nChoose export format:",
+        parse_mode="HTML",
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("📄 JSON", callback_data="export_json")],
             [InlineKeyboardButton("📊 CSV", callback_data="export_csv")],
@@ -45,7 +43,6 @@ async def export_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     contacts = db.query(EmergencyContact).filter(EmergencyContact.user_id == user.id).all()
     access_logs = db.query(AccessLog).filter(AccessLog.user_id == user.id).all()
     sos_logs = db.query(SOSLog).filter(SOSLog.user_id == user.id).all()
-    recovery_codes = db.query(RecoveryCode).filter(RecoveryCode.user_id == user.id).all()
 
     if data == "export_json":
         payload = {
@@ -59,8 +56,10 @@ async def export_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 {
                     "name": c.name,
                     "phone": c.phone,
-                    "relationship": c.relationship,
+                    "relationship": c.relationship_,
                     "priority": c.priority,
+                    "is_verified": c.is_verified,
+                    "consent_obtained": c.consent_obtained,
                     "created_at": c.created_at.isoformat() if c.created_at else None,
                 }
                 for c in contacts
@@ -99,9 +98,9 @@ async def export_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         writer = csv.writer(buf)
 
         writer.writerow(["Emergency Contacts"])
-        writer.writerow(["Name", "Phone", "Relationship", "Priority", "Created At"])
+        writer.writerow(["Name", "Phone", "Relationship", "Priority", "Verified", "Consent", "Created At"])
         for c in contacts:
-            writer.writerow([c.name, c.phone, c.relationship, c.priority, c.created_at])
+            writer.writerow([c.name, c.phone, c.relationship_, c.priority, c.is_verified, c.consent_obtained, c.created_at])
 
         writer.writerow([])
         writer.writerow(["Access Logs"])
@@ -127,14 +126,8 @@ async def export_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
 
-from telegram import InputFile
-
-
 def get_export_handlers():
     return [
         CommandHandler("export", export_command),
         CallbackQueryHandler(export_callback, pattern="^export_"),
     ]
-
-
-from telegram import CallbackQueryHandler

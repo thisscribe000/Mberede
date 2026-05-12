@@ -49,8 +49,8 @@ async def backupcard_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
     for i, contact in enumerate(contacts):
         card_text += f"║  {i+1}. {contact.name:<20s}            ║\n"
         card_text += f"║     {contact.phone:<20s}            ║\n"
-        if contact.relationship:
-            card_text += f"║     ({contact.relationship})\n"
+        if contact.relationship_:
+            card_text += f"║     ({contact.relationship_})\n"
 
     card_text += (
         "╠══════════════════════════════════════╣\n"

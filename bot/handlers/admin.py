@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes, CommandHandler
 
 from core.models import User, get_db
 from bot.keyboards.reply import main_menu
+from bot.utils.auth import verify_pin
 
 
 async def silent_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -38,7 +39,7 @@ async def delete_account_command(update: Update, context: ContextTypes.DEFAULT_T
         await update.message.reply_text("⚠️ This will permanently delete all your data.\n\nTo confirm, type: /delete YOUR_PIN")
         return
 
-    if not verify_pin := __import__("bot.utils.auth", fromlist=["verify_pin"]).verify_pin(pin, user.pin_hash):
+    if not verify_pin(pin, user.pin_hash):
         await update.message.reply_text("❌ Incorrect PIN.")
         return
 

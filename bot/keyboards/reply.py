@@ -1,5 +1,4 @@
 from telegram import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.constants import ReplyMarkup
 
 
 def main_menu() -> ReplyKeyboardMarkup:
@@ -16,7 +15,7 @@ def contact_inline_keyboard(contacts: list) -> InlineKeyboardMarkup:
     for i, contact in enumerate(contacts):
         keyboard.append([
             InlineKeyboardButton(
-                f"{i+1}. {contact.name} ({contact.relationship or 'Contact'})",
+                f"{i+1}. {contact.name} ({contact.relationship_ or 'Contact'})",
                 callback_data=f"view_contact:{contact.id}",
             )
         ])

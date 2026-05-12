@@ -16,7 +16,7 @@ def validate_phone(phone: str) -> Tuple[bool, str, str]:
         parsed = phonenumbers.parse(phone, None)
         if not phonenumbers.is_valid_number(parsed):
             return False, "Invalid phone number.", ""
-        return True, "", phonenumbers.format_number(parsed, phonenumbers.E164_E.164)
+        return True, "", phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
     except phonenumbers.NumberParseException:
         return False, "Could not parse phone number. Include country code (e.g. +234).", ""
 
