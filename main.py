@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from bot.app import create_app
+
+app = create_app()
+
+if __name__ == "__main__":
+    app.run_polling(drop_pending_updates=True)
