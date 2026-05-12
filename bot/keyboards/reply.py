@@ -1,13 +1,29 @@
 from telegram import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardButton, InlineKeyboardMarkup
 
 
-def main_menu() -> ReplyKeyboardMarkup:
+def registered_menu() -> ReplyKeyboardMarkup:
+    keyboard = [
+        [KeyboardButton("/contacts")],
+        [KeyboardButton("/sos")],
+        [KeyboardButton("/add")],
+        [KeyboardButton("/remove")],
+        [KeyboardButton("/emergency")],
+        [KeyboardButton("/help")],
+    ]
+    return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, input_field_placeholder="Select an option")
+
+
+def guest_menu() -> ReplyKeyboardMarkup:
     keyboard = [
         [KeyboardButton("/register")],
         [KeyboardButton("/emergency")],
         [KeyboardButton("/help")],
     ]
     return ReplyKeyboardMarkup(keyboard, resize_keyboard=True, input_field_placeholder="Select an option")
+
+
+def main_menu() -> ReplyKeyboardMarkup:
+    return guest_menu()
 
 
 def contact_inline_keyboard(contacts: list) -> InlineKeyboardMarkup:
